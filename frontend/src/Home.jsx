@@ -5,9 +5,13 @@ import ChatBox from './Components/ChatBox'
 
 const Home = () => {
   return (<>
-    <Sidebar/>
+   
+        <div className="flex h-screen bg-gray-900 text-white">
+       <Sidebar/>
     <ChannelBar/>
     <ChatBox/>
+      
+    </div>
     </>
   )
 }
