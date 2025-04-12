@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 
 const socket = io('http://localhost:5001');
 
-const ChatBox = () => {
+const ChatBox = ({ currentChannel }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [username, setUsername] = useState('');
@@ -12,7 +12,6 @@ const ChatBox = () => {
 
   const bottomRef = useRef(null);
 
-  // Set dynamic username and avatar on first load
   useEffect(() => {
     const randomName = 'User' + Math.floor(Math.random() * 1000);
     const randomAvatar = `https://api.dicebear.com/7.x/identicon/svg?seed=${Math.floor(
@@ -23,20 +22,18 @@ const ChatBox = () => {
   }, []);
 
   useEffect(() => {
-    // Initial messages
+    socket.emit('joinChannel', currentChannel);
+
     socket.on('initialMessages', (initialMessages) => {
       setMessages(initialMessages);
     });
 
-    // New message
     socket.on('receiveMessage', (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
 
-    // Typing indicator
     socket.on('userTyping', (data) => {
       setTypingUser(data.username);
-
       setTimeout(() => setTypingUser(''), 2000);
     });
 
@@ -45,7 +42,7 @@ const ChatBox = () => {
       socket.off('receiveMessage');
       socket.off('userTyping');
     };
-  }, []);
+  }, [currentChannel]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -72,33 +69,27 @@ const ChatBox = () => {
   return (
     <div className="flex-1 flex flex-col bg-gray-850 bg-gray-900">
       <div className="border-b border-gray-700 p-4 text-lg font-semibold">
-        # general
+        #{currentChannel}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Typing Indicator */}
         {typingUser && (
           <div className="text-sm text-gray-400 mb-2">
             {typingUser} is typing...
           </div>
         )}
 
-        {/* Messages */}
         {messages.length === 0 ? (
           <span className="text-gray-400">No messages yet.</span>
         ) : (
           messages.map((msg) => (
             <div key={msg.id} className="flex space-x-3 items-start">
-              {/* Avatar */}
               <img
                 src={msg.avatar}
                 alt={msg.username}
                 className="w-10 h-10 rounded-full"
               />
-
-              {/* Message Content */}
               <div>
-                {/* Username and timestamp */}
                 <div className="flex items-center space-x-2">
                   <span className="font-semibold text-white">
                     {msg.username}
@@ -107,8 +98,6 @@ const ChatBox = () => {
                     {new Date(msg.timestamp).toLocaleString()}
                   </span>
                 </div>
-
-                {/* Message Text */}
                 <div className="text-gray-300 text-sm">{msg.message}</div>
               </div>
             </div>
@@ -124,7 +113,7 @@ const ChatBox = () => {
       >
         <input
           type="text"
-          placeholder="Message #general"
+          placeholder={`Message #${currentChannel}`}
           className="w-full p-3 bg-gray-700 text-white rounded-md"
           value={input}
           onChange={handleTyping}

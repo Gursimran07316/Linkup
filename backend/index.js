@@ -18,25 +18,43 @@ const server = createServer(app);
 // Setup Socket.io
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:5173', // your frontend port
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST'],
   },
 });
 
-// In-memory storage
-let messages = [];
+// In-memory storage of messages by channel
+let channels = {
+  general: [],
+  welcome: [],
+  coding: [],
+  collab: [],
+};
 
-// Socket.io connection
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  // Send existing messages to new client
-  socket.emit('initialMessages', messages);
+  // Default join general channel
+  let currentRoom = 'general';
+  socket.join(currentRoom);
 
-  // Listen for new messages
+  // Send existing messages for the channel
+  socket.emit('initialMessages', channels[currentRoom]);
+
+  // Switch channel
+  socket.on('joinChannel', (newChannel) => {
+    socket.leave(currentRoom);
+    currentRoom = newChannel;
+    socket.join(currentRoom);
+    console.log(`User ${socket.id} switched to ${currentRoom}`);
+
+    socket.emit('initialMessages', channels[currentRoom] || []);
+  });
+
+  // Send message to the current channel
   socket.on('sendMessage', (messageData) => {
     const newMessage = {
-      id: messages.length + 1,
+      id: channels[currentRoom].length + 1,
       username: messageData.username,
       avatar:
         messageData.avatar ||
@@ -45,15 +63,14 @@ io.on('connection', (socket) => {
       timestamp: new Date(),
     };
 
-    messages.push(newMessage);
+    channels[currentRoom].push(newMessage);
 
-    // Broadcast new message to all clients
-    io.emit('receiveMessage', newMessage);
+    io.to(currentRoom).emit('receiveMessage', newMessage);
   });
 
-  // Typing event
+  // Typing indicator
   socket.on('typing', (data) => {
-    socket.broadcast.emit('userTyping', data);
+    socket.to(currentRoom).emit('userTyping', data);
   });
 
   socket.on('disconnect', () => {
@@ -66,7 +83,6 @@ app.get('/', (req, res) => {
   res.send('API is running...');
 });
 
-// Start server
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
