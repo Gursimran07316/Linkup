@@ -6,28 +6,47 @@ const socket = io('http://localhost:5001');
 const ChatBox = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [username, setUsername] = useState('');
+  const [avatar, setAvatar] = useState('');
+  const [typingUser, setTypingUser] = useState('');
 
-  const bottomRef = useRef(null); 
+  const bottomRef = useRef(null);
+
+  // Set dynamic username and avatar on first load
+  useEffect(() => {
+    const randomName = 'User' + Math.floor(Math.random() * 1000);
+    const randomAvatar = `https://api.dicebear.com/7.x/identicon/svg?seed=${Math.floor(
+      Math.random() * 1000
+    )}`;
+    setUsername(randomName);
+    setAvatar(randomAvatar);
+  }, []);
 
   useEffect(() => {
-    // Receive initial messages
+    // Initial messages
     socket.on('initialMessages', (initialMessages) => {
       setMessages(initialMessages);
     });
 
-    // Receive new messages
+    // New message
     socket.on('receiveMessage', (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
 
-    // Clean up the socket connection on component unmount
+    // Typing indicator
+    socket.on('userTyping', (data) => {
+      setTypingUser(data.username);
+
+      setTimeout(() => setTypingUser(''), 2000);
+    });
+
     return () => {
       socket.off('initialMessages');
       socket.off('receiveMessage');
+      socket.off('userTyping');
     };
   }, []);
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -37,12 +56,17 @@ const ChatBox = () => {
     if (!input.trim()) return;
 
     socket.emit('sendMessage', {
-      username: 'Guri',
-      avatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Guri',
+      username,
+      avatar,
       message: input,
     });
 
     setInput('');
+  };
+
+  const handleTyping = (e) => {
+    setInput(e.target.value);
+    socket.emit('typing', { username });
   };
 
   return (
@@ -52,6 +76,14 @@ const ChatBox = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Typing Indicator */}
+        {typingUser && (
+          <div className="text-sm text-gray-400 mb-2">
+            {typingUser} is typing...
+          </div>
+        )}
+
+        {/* Messages */}
         {messages.length === 0 ? (
           <span className="text-gray-400">No messages yet.</span>
         ) : (
@@ -68,32 +100,39 @@ const ChatBox = () => {
               <div>
                 {/* Username and timestamp */}
                 <div className="flex items-center space-x-2">
-                  <span className="font-semibold text-white">{msg.username}</span>
+                  <span className="font-semibold text-white">
+                    {msg.username}
+                  </span>
                   <span className="text-xs text-gray-400">
                     {new Date(msg.timestamp).toLocaleString()}
                   </span>
                 </div>
 
                 {/* Message Text */}
-                <div className="text-gray-300 text-sm">
-                  {msg.message}
-                </div>
+                <div className="text-gray-300 text-sm">{msg.message}</div>
               </div>
             </div>
           ))
         )}
-        <div ref={bottomRef} /> 
+
+        <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={sendMessage} className="p-4 border-t border-gray-700 flex">
+      <form
+        onSubmit={sendMessage}
+        className="p-4 border-t border-gray-700 flex"
+      >
         <input
           type="text"
           placeholder="Message #general"
           className="w-full p-3 bg-gray-700 text-white rounded-md"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={handleTyping}
         />
-        <button type="submit" className="ml-2 px-4 bg-green-600 text-white rounded-md">
+        <button
+          type="submit"
+          className="ml-2 px-4 bg-green-600 text-white rounded-md"
+        >
           Send
         </button>
       </form>

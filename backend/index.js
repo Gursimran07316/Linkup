@@ -19,35 +19,41 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: 'http://localhost:5173', // your frontend port
-    methods: ['GET', 'POST']
-  }
+    methods: ['GET', 'POST'],
+  },
 });
 
-// In-memory messages
+// In-memory storage
 let messages = [];
 
-// When client connects
+// Socket.io connection
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  // Send existing messages to the new client
+  // Send existing messages to new client
   socket.emit('initialMessages', messages);
 
   // Listen for new messages
   socket.on('sendMessage', (messageData) => {
     const newMessage = {
-        id: messages.length + 1,
-        username: messageData.username,
-        avatar: messageData.avatar || 'https://api.dicebear.com/7.x/identicon/svg?seed=Guri',
-        message: messageData.message,
-        timestamp: new Date(),
-      };
-      
+      id: messages.length + 1,
+      username: messageData.username,
+      avatar:
+        messageData.avatar ||
+        'https://api.dicebear.com/7.x/identicon/svg?seed=random',
+      message: messageData.message,
+      timestamp: new Date(),
+    };
 
     messages.push(newMessage);
 
-    // Broadcast message to all clients
+    // Broadcast new message to all clients
     io.emit('receiveMessage', newMessage);
+  });
+
+  // Typing event
+  socket.on('typing', (data) => {
+    socket.broadcast.emit('userTyping', data);
   });
 
   socket.on('disconnect', () => {
