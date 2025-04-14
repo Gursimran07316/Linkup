@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import connectDB from './config/db.js';
+import Message from './models/messageModel.js';
 
 dotenv.config();
 
@@ -23,49 +25,60 @@ const io = new Server(server, {
   },
 });
 
-// In-memory storage of messages by channel
-let channels = {
-  general: [],
-  welcome: [],
-  coding: [],
-  collab: [],
-};
+// Connect to MongoDB
+connectDB();
+
+// Define static channels for now (later we will make this dynamic)
+let channels = ['general', 'welcome', 'coding', 'collab'];
 
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  // Default join general channel
+  // Default room
   let currentRoom = 'general';
   socket.join(currentRoom);
 
-  // Send existing messages for the channel
-  socket.emit('initialMessages', channels[currentRoom]);
+  // Load existing messages from MongoDB when connected
+  const loadMessages = async (room) => {
+    try {
+      const messages = await Message.find({ channel: room });
+      socket.emit('initialMessages', messages);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
+  };
+
+  loadMessages(currentRoom);
 
   // Switch channel
-  socket.on('joinChannel', (newChannel) => {
+  socket.on('joinChannel', async (newChannel) => {
+    if (!channels.includes(newChannel)) {
+      console.log(`Invalid channel: ${newChannel}`);
+      return;
+    }
+
     socket.leave(currentRoom);
     currentRoom = newChannel;
     socket.join(currentRoom);
     console.log(`User ${socket.id} switched to ${currentRoom}`);
 
-    socket.emit('initialMessages', channels[currentRoom] || []);
+    loadMessages(currentRoom);
   });
 
-  // Send message to the current channel
-  socket.on('sendMessage', (messageData) => {
-    const newMessage = {
-      id: channels[currentRoom].length + 1,
-      username: messageData.username,
-      avatar:
-        messageData.avatar ||
-        'https://api.dicebear.com/7.x/identicon/svg?seed=random',
-      message: messageData.message,
-      timestamp: new Date(),
-    };
+  // Handle new messages
+  socket.on('sendMessage', async (messageData) => {
+    try {
+      const newMessage = await Message.create({
+        channel: currentRoom,
+        username: messageData.username,
+        avatar: messageData.avatar,
+        message: messageData.message,
+      });
 
-    channels[currentRoom].push(newMessage);
-
-    io.to(currentRoom).emit('receiveMessage', newMessage);
+      io.to(currentRoom).emit('receiveMessage', newMessage);
+    } catch (error) {
+      console.error('Error saving message:', error);
+    }
   });
 
   // Typing indicator
