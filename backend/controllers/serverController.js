@@ -23,3 +23,30 @@ import generateInviteCode from '../utils/generateInviteCode.js';
     }
   };
   
+  export const getUserServers = async (req, res) => {
+    const { userId } = req.query;
+    try {
+      const servers = await Server.find({ members: userId });
+      res.json(servers);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch servers' });
+    }
+  };
+  export const deleteServer = async (req, res) => {
+    const { id } = req.params;
+    const { userId } = req.body;
+  
+    try {
+      const server = await Server.findById(id);
+      if (!server) return res.status(404).json({ message: 'Server not found' });
+  
+      if (server.owner.toString() !== userId)
+        return res.status(403).json({ message: 'Not authorized to delete' });
+  
+      await server.deleteOne();
+      res.status(200).json({ message: 'Server deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Delete failed' });
+    }
+  };
+  
