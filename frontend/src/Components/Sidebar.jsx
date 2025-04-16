@@ -1,6 +1,6 @@
 import React from 'react'
 import { FaPlus, FaLock } from "react-icons/fa";
-const Sidebar = () => {
+const Sidebar = ({user}) => {
   return (
     <div className="w-16 bg-gray-800 flex flex-col items-center py-4 space-y-4">
       <div className="py-4 border-b border-gray-700">
@@ -24,9 +24,11 @@ const Sidebar = () => {
          
     <div className="w-12 h-12 bg-gray-700 rounded-full"></div>
     <div className="mt-auto mb-4">
-          <div className="w-12 h-12 bg-purple-600 text-white flex items-center justify-center rounded-full cursor-pointer">
-            G
-          </div>
+    <img
+          src={user.avatar}
+          alt="Server Icon"
+          className="w-12 h-12 rounded-full cursor-pointer hover:opacity-80"
+        />
         </div>
   </div>
   )

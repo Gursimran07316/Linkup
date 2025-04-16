@@ -3,23 +3,13 @@ import io from 'socket.io-client';
 
 const socket = io('http://localhost:5001');
 
-const ChatBox = ({ currentChannel }) => {
+const ChatBox = ({ currentChannel ,user}) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-  const [username, setUsername] = useState('');
-  const [avatar, setAvatar] = useState('');
   const [typingUser, setTypingUser] = useState('');
 
   const bottomRef = useRef(null);
 
-  useEffect(() => {
-    const randomName = 'User' + Math.floor(Math.random() * 1000);
-    const randomAvatar = `https://api.dicebear.com/7.x/identicon/svg?seed=${Math.floor(
-      Math.random() * 1000
-    )}`;
-    setUsername(randomName);
-    setAvatar(randomAvatar);
-  }, []);
 
   useEffect(() => {
     socket.emit('joinChannel', currentChannel);
@@ -53,8 +43,8 @@ const ChatBox = ({ currentChannel }) => {
     if (!input.trim()) return;
 
     socket.emit('sendMessage', {
-      username,
-      avatar,
+      username: user?.username,
+      avatar: user?.avatar,
       message: input,
     });
 
@@ -63,7 +53,7 @@ const ChatBox = ({ currentChannel }) => {
 
   const handleTyping = (e) => {
     setInput(e.target.value);
-    socket.emit('typing', { username });
+    socket.emit('typing', {username: user?.username });
   };
 
   return (
