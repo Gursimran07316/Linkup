@@ -6,6 +6,7 @@ import { Server } from 'socket.io';
 import connectDB from './config/db.js';
 import Message from './models/messageModel.js';
 import authRoutes from './routes/authRoutes.js';
+import serverRoutes from './routes/serverRoutes.js';
 dotenv.config();
 
 const app = express();
@@ -92,6 +93,8 @@ io.on('connection', (socket) => {
 });
 // Auth route
 app.use('/api/auth', authRoutes);
+// Servers route
+app.use('/api/servers', serverRoutes);
 
 // Test route
 app.get('/', (req, res) => {
