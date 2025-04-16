@@ -8,6 +8,7 @@ const serverSchema = mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    icon: { type: String, default: '' },
     inviteCode: { type: String, required: true, unique: true },
     members: [
       {

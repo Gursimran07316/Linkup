@@ -22,12 +22,21 @@ const Sidebar = ({ user }) => {
       </div>
 
       {servers.map((srv) => (
-        <div key={srv._id} title={srv.name}>
-          <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center text-sm text-white hover:opacity-80 cursor-pointer">
-            {srv.name[0].toUpperCase()}
-          </div>
-        </div>
-      ))}
+  <div key={srv._id} title={srv.name}>
+    {srv.icon ? (
+      <img
+        src={`http://localhost:5001${srv.icon}`}
+        alt={srv.name}
+        className="w-12 h-12 rounded-full cursor-pointer hover:opacity-80"
+      />
+    ) : (
+      <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center text-sm text-white">
+        {srv.name[0].toUpperCase()}
+      </div>
+    )}
+  </div>
+))}
+
 
       <div className="mt-auto mb-4">
         <img

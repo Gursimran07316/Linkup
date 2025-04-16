@@ -7,6 +7,8 @@ import connectDB from './config/db.js';
 import Message from './models/messageModel.js';
 import authRoutes from './routes/authRoutes.js';
 import serverRoutes from './routes/serverRoutes.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 dotenv.config();
 
 const app = express();
@@ -28,6 +30,9 @@ const io = new Server(server, {
 
 // Connect to MongoDB
 connectDB();
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
 // Define static channels for now (later we will make this dynamic)
 let channels = ['general', 'welcome', 'coding', 'collab'];
