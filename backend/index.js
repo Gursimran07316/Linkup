@@ -5,7 +5,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import connectDB from './config/db.js';
 import Message from './models/messageModel.js';
-
+import authRoutes from './routes/authRoutes.js';
 dotenv.config();
 
 const app = express();
@@ -90,6 +90,8 @@ io.on('connection', (socket) => {
     console.log('User disconnected:', socket.id);
   });
 });
+// Auth route
+app.use('/api/auth', authRoutes);
 
 // Test route
 app.get('/', (req, res) => {
