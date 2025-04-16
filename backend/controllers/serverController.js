@@ -50,3 +50,28 @@ import generateInviteCode from '../utils/generateInviteCode.js';
     }
   };
   
+  export const addChannel = async (req, res) => {
+    const { serverId, channelName } = req.body;
+  
+    if (!serverId || !channelName) {
+      return res.status(400).json({ message: 'Server ID and channel name required' });
+    }
+  
+    try {
+      const server = await Server.findById(serverId);
+      if (!server) return res.status(404).json({ message: 'Server not found' });
+  
+      // prevent duplicates
+      if (server.channels.find((ch) => ch.name === channelName)) {
+        return res.status(400).json({ message: 'Channel already exists' });
+      }
+  
+      server.channels.push({ name: channelName });
+      await server.save();
+  
+      res.status(200).json(server);
+    } catch (err) {
+      res.status(500).json({ message: 'Failed to add channel', error: err.message });
+    }
+  };
+  

@@ -5,7 +5,7 @@ import AuthModal from './Components/AuthModal';
 const App = () => {
   const [user, setUser] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
-
+  const [selectedServer, setSelectedServer] = useState(null);
   useEffect(() => {
     const stored = localStorage.getItem('userInfo');
     if (stored) {
@@ -16,7 +16,11 @@ const App = () => {
   return (
     <div className="h-screen bg-gray-900 text-white">
       {user ? (
-        <Home user={user} />
+        <Home
+        user={user}
+        selectedServer={selectedServer}
+        setSelectedServer={setSelectedServer}
+      />
       ) : (
         <div className="flex items-center justify-center h-full">
           <button

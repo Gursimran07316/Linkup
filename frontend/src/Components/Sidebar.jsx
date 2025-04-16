@@ -3,7 +3,7 @@ import { FaPlus } from 'react-icons/fa';
 import CreateServerModal from './CreateServerModal';
 import axios from '../api/axios';
 
-const Sidebar = ({ user }) => {
+const Sidebar = ({ user ,selectedServer, setSelectedServer }) => {
   const [showModal, setShowModal] = useState(false);
   const [servers, setServers] = useState([]);
 
@@ -56,7 +56,7 @@ const Sidebar = ({ user }) => {
 
       {/* Render All Joined/Owned Servers */}
       {servers.map((srv) => (
-        <div key={srv._id} className="relative group" title={srv.name}>
+        <div key={srv._id} className="relative group" title={srv.name} onClick={() => setSelectedServer(srv)}        >
           {srv.icon ? (
             <img
               src={`http://localhost:5001${srv.icon}`}
