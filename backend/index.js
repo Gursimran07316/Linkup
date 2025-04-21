@@ -34,68 +34,72 @@ connectDB();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
-// Define static channels for now (later we will make this dynamic)
-let channels = ['general', 'welcome', 'coding', 'collab'];
+
 
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  // Default room
-  let currentRoom = 'general';
-  socket.join(currentRoom);
+  let currentRoom = '';
+  let currentServer = '';
+  let currentChannel = '';
 
-  // Load existing messages from MongoDB when connected
-  const loadMessages = async (room) => {
+  // Load messages from DB
+  const loadMessages = async (serverId, channel) => {
     try {
-      const messages = await Message.find({ channel: room });
+      const messages = await Message.find({ serverId, channel }).sort('timestamp');
       socket.emit('initialMessages', messages);
-    } catch (error) {
-      console.error('Error loading messages:', error);
+    } catch (err) {
+      console.error('Load error:', err.message);
     }
   };
 
-  loadMessages(currentRoom);
+  // Join a server/channel combo
+  socket.on('joinChannel', async ({ serverId, channelName }) => {
+    if (!serverId || !channelName) return;
 
-  // Switch channel
-  socket.on('joinChannel', async (newChannel) => {
-    if (!channels.includes(newChannel)) {
-      console.log(`Invalid channel: ${newChannel}`);
-      return;
-    }
+    // Leave previous room
+    if (currentRoom) socket.leave(currentRoom);
 
-    socket.leave(currentRoom);
-    currentRoom = newChannel;
+    currentServer = serverId;
+    currentChannel = channelName;
+    currentRoom = `${serverId}-${channelName}`;
     socket.join(currentRoom);
-    console.log(`User ${socket.id} switched to ${currentRoom}`);
 
-    loadMessages(currentRoom);
+    console.log(`User ${socket.id} joined ${currentRoom}`);
+    await loadMessages(serverId, channelName);
   });
 
-  // Handle new messages
-  socket.on('sendMessage', async (messageData) => {
+  // Send message
+  socket.on('sendMessage', async (data) => {
+    if (!currentServer || !currentChannel) return;
+
     try {
       const newMessage = await Message.create({
-        channel: currentRoom,
-        username: messageData.username,
-        avatar: messageData.avatar,
-        message: messageData.message,
+        serverId: currentServer,
+        channel: currentChannel,
+        username: data.username,
+        avatar: data.avatar,
+        message: data.message,
       });
 
       io.to(currentRoom).emit('receiveMessage', newMessage);
-    } catch (error) {
-      console.error('Error saving message:', error);
+    } catch (err) {
+      console.error('Send error:', err.message);
     }
   });
 
   // Typing indicator
   socket.on('typing', (data) => {
-    socket.to(currentRoom).emit('userTyping', data);
+    if (currentRoom) {
+      socket.to(currentRoom).emit('userTyping', data);
+    }
   });
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
   });
 });
+
 // Auth route
 app.use('/api/auth', authRoutes);
 // Servers route

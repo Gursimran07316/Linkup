@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 
 const socket = io('http://localhost:5001');
 
-const ChatBox = ({ currentChannel ,user}) => {
+const ChatBox = ({ currentChannel ,user,currentServer}) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [typingUser, setTypingUser] = useState('');
@@ -12,27 +12,33 @@ const ChatBox = ({ currentChannel ,user}) => {
 
 
   useEffect(() => {
-    socket.emit('joinChannel', currentChannel);
-
+    if (!currentServer || !currentChannel) return;
+  
+    socket.emit('joinChannel', {
+      serverId: currentServer._id,
+      channelName: currentChannel,
+    });
+  
     socket.on('initialMessages', (initialMessages) => {
       setMessages(initialMessages);
     });
-
+  
     socket.on('receiveMessage', (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
-
+  
     socket.on('userTyping', (data) => {
       setTypingUser(data.username);
       setTimeout(() => setTypingUser(''), 2000);
     });
-
+  
     return () => {
       socket.off('initialMessages');
       socket.off('receiveMessage');
       socket.off('userTyping');
     };
-  }, [currentChannel]);
+  }, [currentServer, currentChannel]);
+  
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -43,17 +49,25 @@ const ChatBox = ({ currentChannel ,user}) => {
     if (!input.trim()) return;
 
     socket.emit('sendMessage', {
+      serverId: currentServer._id,
+      channelName: currentChannel,
       username: user?.username,
       avatar: user?.avatar,
       message: input,
     });
+    
 
     setInput('');
   };
 
   const handleTyping = (e) => {
     setInput(e.target.value);
-    socket.emit('typing', {username: user?.username });
+    socket.emit('typing', {
+      serverId: currentServer._id,
+      channelName: currentChannel,
+      username: user?.username,
+    });
+    
   };
 
   return (

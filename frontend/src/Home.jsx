@@ -28,7 +28,7 @@ const Home = ({ user, selectedServer, setSelectedServer }) => {
           />
           <ChatBox
             currentChannel={currentChannel}
-            server={selectedServer}
+          currentServer={selectedServer}
             user={user}
           />
         </>
