@@ -3,8 +3,7 @@ import generateInviteCode from '../utils/generateInviteCode.js';
 
  export const createServer = async (req, res) => {
     const { name, userId } = req.body;
-    const icon = req.file ? `/uploads/${req.file.filename}` : '';
-  
+    const icon = req.file ? req.file.path : '';
     try {
       const inviteCode = generateInviteCode();
   

@@ -59,7 +59,7 @@ const Sidebar = ({ user ,selectedServer, setSelectedServer }) => {
         <div key={srv._id} className="relative group" title={srv.name} onClick={() => setSelectedServer(srv)}        >
           {srv.icon ? (
             <img
-              src={`http://localhost:5001${srv.icon}`}
+              src={srv.icon}
               alt={srv.name}
               className="w-12 h-12 rounded-full cursor-pointer hover:opacity-80"
             />
