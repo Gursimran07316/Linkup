@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from './Components/Sidebar';
 import ChannelBar from './Components/ChannelBar';
 import ChatBox from './Components/ChatBox';
 
 const Home = ({ user, selectedServer, setSelectedServer }) => {
   const [currentChannel, setCurrentChannel] = useState(null);
+useEffect(() => {
+
+ if(selectedServer){
+  setCurrentChannel(selectedServer.channels.map(c=>c.name).includes('general')?'general':'')
+ }
+}, [selectedServer])
 
   return (
     <div className="flex h-screen bg-gray-900 text-white">

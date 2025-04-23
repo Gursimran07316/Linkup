@@ -3,45 +3,42 @@ import io from 'socket.io-client';
 
 const socket = io('http://localhost:5001');
 
-const ChatBox = ({ currentChannel ,user,currentServer}) => {
+const ChatBox = ({ currentChannel, user, currentServer }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [typingUser, setTypingUser] = useState('');
-
-  const bottomRef = useRef(null);
-
+  const topRef = useRef(null);
 
   useEffect(() => {
     if (!currentServer || !currentChannel) return;
-  
+
     socket.emit('joinChannel', {
       serverId: currentServer._id,
       channelName: currentChannel,
     });
-  
+
     socket.on('initialMessages', (initialMessages) => {
       setMessages(initialMessages);
     });
-  
+
     socket.on('receiveMessage', (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
-  
+
     socket.on('userTyping', (data) => {
       setTypingUser(data.username);
       setTimeout(() => setTypingUser(''), 2000);
     });
-  
+
     return () => {
       socket.off('initialMessages');
       socket.off('receiveMessage');
       socket.off('userTyping');
     };
   }, [currentServer, currentChannel]);
-  
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    topRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const sendMessage = (e) => {
@@ -55,7 +52,6 @@ const ChatBox = ({ currentChannel ,user,currentServer}) => {
       avatar: user?.avatar,
       message: input,
     });
-    
 
     setInput('');
   };
@@ -67,50 +63,62 @@ const ChatBox = ({ currentChannel ,user,currentServer}) => {
       channelName: currentChannel,
       username: user?.username,
     });
-    
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-850 bg-gray-900">
+    <div className="flex-1 flex flex-col bg-gray-900">
+      {/* Channel Header */}
       <div className="border-b border-gray-700 p-4 text-lg font-semibold">
         #{currentChannel}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {typingUser && (
-          <div className="text-sm text-gray-400 mb-2">
-            {typingUser} is typing...
-          </div>
-        )}
+      {/* Message area - bottom-up */}
+      <div className="flex-1 overflow-y-auto p-4 flex flex-col-reverse space-y-reverse space-y-4">
+        <div ref={topRef} />
 
-        {messages.length === 0 ? (
-          <span className="text-gray-400">No messages yet.</span>
-        ) : (
-          messages.map((msg) => (
-            <div key={msg.id} className="flex space-x-3 items-start">
-              <img
-                src={msg.avatar}
-                alt={msg.username}
-                className="w-10 h-10 rounded-full"
-              />
-              <div>
-                <div className="flex items-center space-x-2">
-                  <span className="font-semibold text-white">
-                    {msg.username}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    {new Date(msg.timestamp).toLocaleString()}
-                  </span>
-                </div>
-                <div className="text-gray-300 text-sm">{msg.message}</div>
+        {/* Chat Messages (newest to oldest) */}
+        {[...messages].reverse().map((msg) => (
+          <div key={msg.id} className="flex space-x-3 items-start">
+            <img
+              src={msg.avatar}
+              alt={msg.username}
+              className="w-10 h-10 rounded-full"
+            />
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="font-semibold text-white">{msg.username}</span>
+                <span className="text-xs text-gray-400">
+                  {new Date(msg.timestamp).toLocaleString()}
+                </span>
               </div>
+              <div className="text-gray-300 text-sm">{msg.message}</div>
             </div>
-          ))
-        )}
+          </div>
+        ))}
 
-        <div ref={bottomRef} />
+       
+    
+          <div className="flex items-start space-x-4">
+            <div className="w-14 h-14 bg-gray-700 rounded-full flex items-center justify-center text-4xl text-gray-400">
+              #
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-1">
+                Welcome to <span className="text-gray-300">#{currentChannel}</span>
+              </h2>
+              <p className="text-gray-400 text-sm">
+                This is the start of the #{currentChannel} channel.
+              </p>
+            </div>
+          </div>
+      
+        {/* Typing Indicator */}
+        {typingUser && (
+          <div className="text-sm text-gray-400">{typingUser} is typing...</div>
+        )}
       </div>
 
+      {/* Input Form */}
       <form
         onSubmit={sendMessage}
         className="p-4 border-t border-gray-700 flex"

@@ -20,7 +20,7 @@ const Sidebar = ({ user ,selectedServer, setSelectedServer }) => {
     };
 
     fetchServers();
-  }, [user]);
+  }, [user,servers]);
 
   // Add new server to sidebar
   const handleServerCreated = (newServer) => {
@@ -37,6 +37,7 @@ const Sidebar = ({ user ,selectedServer, setSelectedServer }) => {
         data: { userId: user._id },
       });
       setServers((prev) => prev.filter((s) => s._id !== serverId));
+      window.location.reload(); 
     } catch (err) {
       alert('Failed to delete server.');
     }
@@ -107,7 +108,7 @@ const Sidebar = ({ user ,selectedServer, setSelectedServer }) => {
     onClose={() => setShowProfile(false)}
     onLogout={() => {
       localStorage.removeItem('userInfo');
-      window.location.reload(); // Or navigate('/') if using router
+      window.location.reload(); 
     }}
   />
 )}
