@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { FaPlus } from 'react-icons/fa';
 import CreateServerModal from './CreateServerModal';
 import axios from '../api/axios';
+import UserProfileModal from './UserProfileModal';
 
 const Sidebar = ({ user ,selectedServer, setSelectedServer }) => {
   const [showModal, setShowModal] = useState(false);
   const [servers, setServers] = useState([]);
-
+  const [showProfile, setShowProfile] = useState(false);
   // Fetch all servers the user is a member of
   useEffect(() => {
     const fetchServers = async () => {
@@ -88,6 +89,7 @@ const Sidebar = ({ user ,selectedServer, setSelectedServer }) => {
           src={user.avatar}
           alt="Your Avatar"
           className="w-12 h-12 rounded-full cursor-pointer hover:opacity-80"
+          onClick={() => setShowProfile(true)}
         />
       </div>
 
@@ -99,6 +101,16 @@ const Sidebar = ({ user ,selectedServer, setSelectedServer }) => {
           onCreated={handleServerCreated}
         />
       )}
+      {showProfile && (
+  <UserProfileModal
+    user={user}
+    onClose={() => setShowProfile(false)}
+    onLogout={() => {
+      localStorage.removeItem('userInfo');
+      window.location.reload(); // Or navigate('/') if using router
+    }}
+  />
+)}
     </div>
   );
 };
