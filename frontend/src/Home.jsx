@@ -12,12 +12,27 @@ useEffect(() => {
  }
 }, [selectedServer])
 
+  // Delete a server (only if user is owner)
+  const handleDeleteServer = async (serverId, serverName) => {
+    const confirm = window.confirm(`Are you sure you want to delete "${serverName}"?`);
+    if (!confirm) return;
+
+    try {
+      await axios.delete(`/servers/${serverId}`, {
+        data: { userId: user._id },
+      });
+      setSelectedServer(null);
+    } catch (err) {
+      alert('Failed to delete server.');
+    }
+  };
   return (
     <div className="flex h-screen bg-gray-900 text-white">
       <Sidebar
         user={user}
         selectedServer={selectedServer}
         setSelectedServer={setSelectedServer}
+        handleDeleteServer={handleDeleteServer}
       />
 
       {/* No server selected yet */}

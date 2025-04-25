@@ -4,7 +4,7 @@ import CreateServerModal from './CreateServerModal';
 import axios from '../api/axios';
 import UserProfileModal from './UserProfileModal';
 
-const Sidebar = ({ user ,selectedServer, setSelectedServer }) => {
+const Sidebar = ({ user ,selectedServer, setSelectedServer ,handleDeleteServer}) => {
   const [showModal, setShowModal] = useState(false);
   const [servers, setServers] = useState([]);
   const [showProfile, setShowProfile] = useState(false);
@@ -27,21 +27,7 @@ const Sidebar = ({ user ,selectedServer, setSelectedServer }) => {
     setServers((prev) => [...prev, newServer]);
   };
 
-  // Delete a server (only if user is owner)
-  const handleDeleteServer = async (serverId, serverName) => {
-    const confirm = window.confirm(`Are you sure you want to delete "${serverName}"?`);
-    if (!confirm) return;
 
-    try {
-      await axios.delete(`/servers/${serverId}`, {
-        data: { userId: user._id },
-      });
-      setServers((prev) => prev.filter((s) => s._id !== serverId));
-      window.location.reload(); 
-    } catch (err) {
-      alert('Failed to delete server.');
-    }
-  };
 
   return (
     <div className="w-16 bg-gray-800 flex flex-col items-center py-4 space-y-4">
