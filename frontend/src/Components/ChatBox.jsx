@@ -1,41 +1,54 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import io from 'socket.io-client';
+import { GlobalContext } from '../context/GlobalState';
 
 const socket = io('http://localhost:5001');
 
-const ChatBox = ({ currentChannel, user, currentServer }) => {
-  const [messages, setMessages] = useState([]);
+const ChatBox = () => {
   const [input, setInput] = useState('');
-  const [typingUser, setTypingUser] = useState('');
   const topRef = useRef(null);
+  const [messages, setMessages] = useState([])
+  const {
+    user,
+    selectedServer,
+    currentChannel,
+    typingUser,
+    setTypingUser,
+  } = useContext(GlobalContext);
 
   useEffect(() => {
-    if (!currentServer || !currentChannel) return;
+    if (!selectedServer || !currentChannel) return;
 
+    // Step 1: Join channel
     socket.emit('joinChannel', {
-      serverId: currentServer._id,
+      serverId: selectedServer._id,
       channelName: currentChannel,
     });
 
+    // Step 2: Listen for initial messages from server
     socket.on('initialMessages', (initialMessages) => {
+      console.log('Received initial messages:', initialMessages);
       setMessages(initialMessages);
     });
 
+    // Step 3: Listen for new incoming messages
     socket.on('receiveMessage', (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
 
+    // Step 4: Listen for typing events
     socket.on('userTyping', (data) => {
       setTypingUser(data.username);
       setTimeout(() => setTypingUser(''), 2000);
     });
 
+    // Cleanup on unmount
     return () => {
       socket.off('initialMessages');
       socket.off('receiveMessage');
       socket.off('userTyping');
     };
-  }, [currentServer, currentChannel]);
+  }, [selectedServer, currentChannel]);
 
   useEffect(() => {
     topRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -46,7 +59,7 @@ const ChatBox = ({ currentChannel, user, currentServer }) => {
     if (!input.trim()) return;
 
     socket.emit('sendMessage', {
-      serverId: currentServer._id,
+      serverId: selectedServer._id,
       channelName: currentChannel,
       username: user?.username,
       avatar: user?.avatar,
@@ -59,7 +72,7 @@ const ChatBox = ({ currentChannel, user, currentServer }) => {
   const handleTyping = (e) => {
     setInput(e.target.value);
     socket.emit('typing', {
-      serverId: currentServer._id,
+      serverId: selectedServer._id,
       channelName: currentChannel,
       username: user?.username,
     });
@@ -72,13 +85,13 @@ const ChatBox = ({ currentChannel, user, currentServer }) => {
         #{currentChannel}
       </div>
 
-      {/* Message area - bottom-up */}
+      {/* Message area */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col-reverse space-y-reverse space-y-4">
         <div ref={topRef} />
 
-        {/* Chat Messages (newest to oldest) */}
+        {/* Chat Messages */}
         {[...messages].reverse().map((msg) => (
-          <div key={msg.id} className="flex space-x-3 items-start">
+          <div key={msg._id} className="flex space-x-3 items-start">
             <img
               src={msg.avatar}
               alt={msg.username}
@@ -96,8 +109,8 @@ const ChatBox = ({ currentChannel, user, currentServer }) => {
           </div>
         ))}
 
-       
-    
+        {/* Welcome message if no messages */}
+        {messages.length === 0 && (
           <div className="flex items-start space-x-4">
             <div className="w-14 h-14 bg-gray-700 rounded-full flex items-center justify-center text-4xl text-gray-400">
               #
@@ -111,7 +124,8 @@ const ChatBox = ({ currentChannel, user, currentServer }) => {
               </p>
             </div>
           </div>
-      
+        )}
+
         {/* Typing Indicator */}
         {typingUser && (
           <div className="text-sm text-gray-400">{typingUser} is typing...</div>

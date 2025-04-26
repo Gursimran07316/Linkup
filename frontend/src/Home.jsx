@@ -1,17 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import Sidebar from './Components/Sidebar';
 import ChannelBar from './Components/ChannelBar';
 import ChatBox from './Components/ChatBox';
-import axios from "./api/axios"
-const Home = ({ user, selectedServer, setSelectedServer }) => {
-  const [currentChannel, setCurrentChannel] = useState(null);
-useEffect(() => {
+import axios from "./api/axios";
+import { GlobalContext } from './context/GlobalState';
 
- if(selectedServer){
-  setCurrentChannel(selectedServer.channels.map(c=>c.name).includes('general')?'general':'')
- }
-}, [selectedServer])
+const Home = () => {
+  const {
+    user,
+    selectedServer,
+    setServer,
+    servers,
+    currentChannel,
+    setChannel,
+    logoutUser,
+    fetchServers,
+    setMembers,
+  } = useContext(GlobalContext);
 
+  // useEffect(() => {
+  //   if (selectedServer) {
+  //     setChannel(
+  //       selectedServer.channels.map((c) => c.name).includes('general') ? 'general' : ''
+  //     );
+  //   }
+  // }, [selectedServer]);
+console.log(servers);
   // Delete a server (only if user is owner)
   const handleDeleteServer = async (serverId, serverName) => {
     const confirm = window.confirm(`Are you sure you want to delete "${serverName}"?`);
@@ -21,22 +35,23 @@ useEffect(() => {
       await axios.delete(`/servers/${serverId}`, {
         data: { userId: user._id },
       });
-      setSelectedServer(null);
+      setServer(null);
+      fetchServers(user._id); // refetch updated servers list
     } catch (err) {
       alert('Failed to delete server.');
     }
   };
 
+  // Kick a member from server (admin only)
   const handleKick = async (memberId) => {
     if (!window.confirm('Are you sure you want to kick this member?')) return;
-  
+
     try {
       const { data } = await axios.put(`/servers/${selectedServer._id}/kick/${memberId}`, {
-        adminId: user._id, 
+        adminId: user._id,
       });
-  
-      window.location.reload(); 
-      
+
+      setMembers(data.members); // update members immediately without reload
     } catch (error) {
       alert('Failed to kick member');
       console.log(error.message);
@@ -45,32 +60,16 @@ useEffect(() => {
 
   return (
     <div className="flex h-screen bg-gray-900 text-white">
-      <Sidebar
-        user={user}
-        selectedServer={selectedServer}
-        setSelectedServer={setSelectedServer}
-        handleDeleteServer={handleDeleteServer}
-      />
+      <Sidebar handleDeleteServer={handleDeleteServer} />
 
-      {/* No server selected yet */}
       {!selectedServer ? (
         <div className="flex-1 flex items-center justify-center text-lg">
           Select a server to start chatting.
         </div>
       ) : (
         <>
-          <ChannelBar
-            currentChannel={currentChannel}
-            user={user}
-            setCurrentChannel={setCurrentChannel}
-            server={selectedServer}
-            handleKick={handleKick}
-          />
-          <ChatBox
-            currentChannel={currentChannel}
-          currentServer={selectedServer}
-            user={user}
-          />
+          <ChannelBar handleKick={handleKick} />
+          <ChatBox />
         </>
       )}
     </div>

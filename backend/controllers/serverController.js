@@ -71,7 +71,11 @@ import generateInviteCode from '../utils/generateInviteCode.js';
       server.channels.push({ name: channelName });
       await server.save();
   
-      res.status(200).json(server);
+      const populatedServer = await Server.findById(serverId)
+      .populate('members', 'username avatar')
+      .populate('admin', 'username avatar');
+
+    res.status(200).json(populatedServer);
     } catch (err) {
       res.status(500).json({ message: 'Failed to add channel', error: err.message });
     }

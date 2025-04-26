@@ -1,37 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { FaPlus } from 'react-icons/fa';
 import CreateServerModal from './CreateServerModal';
-import axios from '../api/axios';
 import UserProfileModal from './UserProfileModal';
+import { GlobalContext } from '../context/GlobalState';
 
-const Sidebar = ({ user ,selectedServer, setSelectedServer ,handleDeleteServer}) => {
+const Sidebar = ({ handleDeleteServer }) => {
   const [showModal, setShowModal] = useState(false);
-  const [servers, setServers] = useState([]);
   const [showProfile, setShowProfile] = useState(false);
-  // Fetch all servers the user is a member of
+
+  const {
+    user,
+    servers,
+    selectedServer,
+    setServer,
+    fetchServers,
+    logoutUser,
+    setChannel
+  } = useContext(GlobalContext);
+
   useEffect(() => {
-    const fetchServers = async () => {
-      try {
-        const { data } = await axios.get(`/servers?userId=${user._id}`);
-        setServers(data);
-      } catch (err) {
-        console.error('Error loading servers:', err);
-      }
-    };
+    if (user) {
+      fetchServers(user._id);
+    }
+    console.log(user);
+  }, [user]);
 
-    fetchServers();
-  }, [user,servers]);
-
-  // Add new server to sidebar
-  const handleServerCreated = (newServer) => {
-    setServers((prev) => [...prev, newServer]);
+  const handleServerCreated = () => {
+    // After creating server, just refetch
+    fetchServers(user._id);
   };
-
-
 
   return (
     <div className="w-16 bg-gray-800 flex flex-col items-center py-4 space-y-4">
-      {/* Create New Server */}
+      {/* Create New Server Button */}
       <div className="py-4 border-b border-gray-700">
         <div
           onClick={() => setShowModal(true)}
@@ -42,22 +43,38 @@ const Sidebar = ({ user ,selectedServer, setSelectedServer ,handleDeleteServer})
         </div>
       </div>
 
-      {/* Render All Joined/Owned Servers */}
+      {/* Server List */}
       {servers.map((srv) => (
-        <div key={srv._id} className="relative group" title={srv.name} onClick={() => setSelectedServer(srv)}        >
+        <div key={srv._id} className="relative group" title={srv.name}  
+         onClick={() => {setServer(srv);
+          if (srv.channels && srv.channels.length > 0) {
+            const generalChannel = srv.channels.find((ch) => ch.name.toLowerCase() === 'general');
+            if (generalChannel) {
+              setChannel(generalChannel.name);
+            } else {
+              setChannel(srv.channels[0].name); // fallback: first channel
+            }
+          }
+        }} >
           {srv.icon ? (
             <img
               src={srv.icon}
               alt={srv.name}
-              className="w-12 h-12 rounded-full cursor-pointer hover:opacity-80"
+              className={`w-12 h-12 rounded-full cursor-pointer hover:opacity-80 ${
+                selectedServer?._id === srv._id ? 'ring-2 ring-green-500' : ''
+              }`}
             />
           ) : (
-            <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center text-sm text-white">
+            <div
+              className={`w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center text-sm text-white cursor-pointer ${
+                selectedServer?._id === srv._id ? 'ring-2 ring-green-500' : ''
+              }`}
+            >
               {srv.name[0].toUpperCase()}
             </div>
           )}
 
-          {/* Delete Icon */}
+          {/* Delete Button if User is Owner */}
           {srv.owner === user._id && (
             <button
               onClick={() => handleDeleteServer(srv._id, srv.name)}
@@ -80,7 +97,7 @@ const Sidebar = ({ user ,selectedServer, setSelectedServer ,handleDeleteServer})
         />
       </div>
 
-      {/* Modal for Server Creation */}
+      {/* Create Server Modal */}
       {showModal && (
         <CreateServerModal
           user={user}
@@ -88,16 +105,18 @@ const Sidebar = ({ user ,selectedServer, setSelectedServer ,handleDeleteServer})
           onCreated={handleServerCreated}
         />
       )}
+
+      {/* Profile Modal */}
       {showProfile && (
-  <UserProfileModal
-    user={user}
-    onClose={() => setShowProfile(false)}
-    onLogout={() => {
-      localStorage.removeItem('userInfo');
-      window.location.reload(); 
-    }}
-  />
-)}
+        <UserProfileModal
+          user={user}
+          onClose={() => setShowProfile(false)}
+          onLogout={() => {
+            logoutUser();
+            localStorage.removeItem('userInfo');
+          }}
+        />
+      )}
     </div>
   );
 };

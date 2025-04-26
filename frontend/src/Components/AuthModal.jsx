@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from '../api/axios';
+import { GlobalContext } from '../context/GlobalState';
 
-const AuthModal = ({ onSuccess }) => {
+const AuthModal = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
   const [image, setImage] = useState(null);
+
+  const { setUser } = useContext(GlobalContext);
 
   const toggleMode = () => {
     setIsLogin(!isLogin);
@@ -53,15 +56,16 @@ const AuthModal = ({ onSuccess }) => {
         : { ...form, avatar };
 
       const { data } = await axios.post(endpoint, payload);
+
       localStorage.setItem('userInfo', JSON.stringify(data));
-      onSuccess(data);
+      setUser(data);  // <-- using Global Context to set user ✅
+
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong');
     } finally {
       setUploading(false);
     }
   };
-
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

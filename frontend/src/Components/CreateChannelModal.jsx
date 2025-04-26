@@ -18,6 +18,7 @@ const CreateChannelModal = ({ serverId, onClose, onCreated }) => {
       onClose();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to create channel');
+      console.log(err.message);
     }
   };
 
