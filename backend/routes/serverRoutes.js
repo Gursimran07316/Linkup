@@ -5,7 +5,8 @@ import {
     deleteServer,
     addChannel,
     getServerByInvite,
-    joinServer  } from '../controllers/serverController.js';
+    joinServer,
+    kickMember  } from '../controllers/serverController.js';
 import upload from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
@@ -16,4 +17,5 @@ router.delete('/:id', deleteServer);
 router.post('/channel', addChannel);
 router.get('/invite/:code', getServerByInvite);
 router.post('/join/:code', joinServer);
+router.put('/:serverId/kick/:userId', kickMember);
 export default router;

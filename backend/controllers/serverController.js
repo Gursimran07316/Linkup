@@ -111,4 +111,30 @@ import generateInviteCode from '../utils/generateInviteCode.js';
       res.status(500).json({ message: 'Failed to join', error: err.message });
     }
   };
-    
+  export const kickMember = async (req, res) => {
+    const { serverId, userId } = req.params;
+    const { adminId } = req.body; 
+  
+    try {
+      const server = await Server.findById(serverId);
+      if (!server) return res.status(404).json({ message: 'Server not found' });
+  
+      // Only Admin can kick
+      if (server.admin.toString() !== adminId) {
+        return res.status(403).json({ message: 'Not authorized to kick members' });
+      }
+  
+      // Remove user from members
+      server.members = server.members.filter(
+        (member) => member.toString() !== userId
+      );
+  
+      await server.save();
+  
+      // Return updated server members
+      res.json({ members: server.members });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { FaAngleDown, FaUserPlus, FaPlus, FaTrash, FaCog } from 'react-icons/fa';
+import { FaAngleDown, FaUserPlus, FaPlus, FaTrash, FaCog, FaCrown, FaTimes } from 'react-icons/fa';
 import InviteModal from './InviteModal'; 
 import CreateChannelModal from './CreateChannelModal';
 
-const ChannelBar = ({ currentChannel, setCurrentChannel, server }) => {
+const ChannelBar = ({ currentChannel, setCurrentChannel, server ,user,handleKick}) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showChannelModal, setShowChannelModal] = useState(false);
@@ -93,8 +93,9 @@ const ChannelBar = ({ currentChannel, setCurrentChannel, server }) => {
         {server.members.map((member) => (
           <div
             key={member._id}
-            className="flex items-center space-x-2 p-2 text-sm text-white hover:bg-gray-700 rounded"
+            className="flex items-center space-x-2 p-2 text-sm text-white hover:bg-gray-700 rounded justify-between"
           >
+            <div className="flex items-center space-x-2">
             <img
               src={member.avatar}
               alt={member.username}
@@ -102,10 +103,17 @@ const ChannelBar = ({ currentChannel, setCurrentChannel, server }) => {
             />
             <span className="truncate">
               {member.username}
-              {server.admin === member._id && (
-                <FaCrown className="inline text-yellow-400 ml-1" title="Admin" />
+              {server.admin._id === member._id && (
+                <FaCrown className="inline text-yellow-400 ml-2" title="Admin" />
               )}
             </span>
+          </div>
+           
+    {/* Kick button if viewer is admin and not kicking themselves */}
+      {server.admin._id === user._id && member._id !== user._id && (
+      
+      <FaTimes className="inline text-red-500 ml-2" title="Remove" onClick={() => handleKick(member._id)} />
+    )}
           </div>
         ))}
       </div>
