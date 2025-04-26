@@ -10,6 +10,11 @@ const serverSchema = mongoose.Schema(
     },
     icon: { type: String, default: '' },
     inviteCode: { type: String, required: true, unique: true },
+    admin: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
     members: [
       {
         type: mongoose.Schema.Types.ObjectId,

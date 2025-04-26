@@ -14,6 +14,7 @@ import generateInviteCode from '../utils/generateInviteCode.js';
         icon,
         members: [userId],
         channels: [{ name: 'general' }],
+        admin:userId
       });
   
       res.status(201).json(newServer);
@@ -25,7 +26,9 @@ import generateInviteCode from '../utils/generateInviteCode.js';
   export const getUserServers = async (req, res) => {
     const { userId } = req.query;
     try {
-      const servers = await Server.find({ members: userId });
+      const servers = await Server.find({ members: userId })
+      .populate('members', 'username avatar')
+      .populate('admin', 'username avatar');
       res.json(servers);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch servers' });
@@ -85,6 +88,8 @@ import generateInviteCode from '../utils/generateInviteCode.js';
       res.status(500).json({ message: 'Error finding server' });
     }
   };
+
+
   export const joinServer = async (req, res) => {
     const { code } = req.params;
     const { userId } = req.body;

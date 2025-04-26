@@ -87,6 +87,28 @@ const ChannelBar = ({ currentChannel, setCurrentChannel, server }) => {
           </div>
         ))}
       </div>
+        {/* Members */}
+        <div className="mt-4">
+        <h3 className="text-gray-400 uppercase text-xs mb-2">Members</h3>
+        {server.members.map((member) => (
+          <div
+            key={member._id}
+            className="flex items-center space-x-2 p-2 text-sm text-white hover:bg-gray-700 rounded"
+          >
+            <img
+              src={member.avatar}
+              alt={member.username}
+              className="w-6 h-6 rounded-full"
+            />
+            <span className="truncate">
+              {member.username}
+              {server.admin === member._id && (
+                <FaCrown className="inline text-yellow-400 ml-1" title="Admin" />
+              )}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
