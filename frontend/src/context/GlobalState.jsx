@@ -57,6 +57,35 @@ export const GlobalProvider = ({ children }) => {
       console.error('Error fetching messages', error);
     }
   };
+  const handleDeleteChannel = async (channelId) => {
+    if (!window.confirm('Are you sure you want to delete this channel?')) return;
+    try {
+      const { data } = await axios.delete(`/servers/${state.selectedServer._id}/channels/${channelId}`, {
+        data: { adminId: state.user._id },
+      });
+      setServer({ ...state.selectedServer, channels: data.channels });
+    } catch (error) {
+      alert('Delete failed');
+      console.log(error.message);
+    }
+  };
+
+  const handleRename = async (newName,channel,onClose) => {
+    if (!newName.trim()) return;
+
+    try {
+      const { data } = await axios.put(`/servers/${state.selectedServer._id}/channels/${channel._id}/rename`, {
+        newName,
+        adminId: state.user._id,
+      });
+      setServer({ ...state.selectedServer, channels: data.channels });
+      setChannel(newName);
+      onClose(); // close modal
+    } catch (err) {
+      alert('Failed to rename channel');
+      console.log(err.message);
+    }
+  };
 
   useEffect(() => {
     const storedUser = localStorage.getItem('userInfo');
@@ -83,6 +112,8 @@ export const GlobalProvider = ({ children }) => {
         fetchServers,
         fetchMembers,
         fetchMessages,
+        handleDeleteChannel,
+        handleRename
       }}
     >
       {children}

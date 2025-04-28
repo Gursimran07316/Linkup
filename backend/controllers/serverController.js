@@ -142,3 +142,57 @@ import generateInviteCode from '../utils/generateInviteCode.js';
       res.status(500).json({ message: 'Server error' });
     }
   };
+
+
+// --- Rename a Channel ---
+export const renameChannel = async (req, res) => {
+  const { serverId, channelId } = req.params;
+  const { newName, adminId } = req.body;
+
+  try {
+    const server = await Server.findById(serverId);
+    if (!server) return res.status(404).json({ message: 'Server not found' });
+
+    // Only admin can rename
+    if (server.admin.toString() !== adminId) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const channel = server.channels.id(channelId);
+    if (!channel) return res.status(404).json({ message: 'Channel not found' });
+
+    channel.name = newName;
+    await server.save();
+
+    res.status(200).json({ channels: server.channels });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to rename channel', error: err.message });
+  }
+};
+
+// --- Delete a Channel ---
+export const deleteChannel = async (req, res) => {
+  const { serverId, channelId } = req.params;
+  const { adminId } = req.body;
+
+  try {
+    const server = await Server.findById(serverId);
+    if (!server) return res.status(404).json({ message: 'Server not found' });
+
+    // Only admin can delete
+    if (server.admin.toString() !== adminId) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const channel = server.channels.id(channelId);
+    if (!channel) return res.status(404).json({ message: 'Channel not found' });
+
+    server.channels = server.channels.filter((ch) => ch._id.toString() !== channelId);
+    await server.save();
+
+    res.status(200).json({ channels: server.channels });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete channel', error: err.message });
+    
+  }
+};
