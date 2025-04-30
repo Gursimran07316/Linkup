@@ -60,10 +60,11 @@ Linkup/
 │   │   ├── context/      # Global state (Context + Reducer)
 │   │   └── App.jsx       # Main App component
 └── README.md
+
 🧪 Run Locally
 
 1. Clone the repo
-git clone https://github.com/YOUR_USERNAME/linkup-discord-clone.git
+git clone https://github.com/Gursimran07316/Linkup
 cd linkup-discord-clone
 
 2. Install backend dependencies
