@@ -3,7 +3,6 @@ import { FaAngleDown, FaUserPlus, FaPlus, FaTrash, FaCog, FaCrown, FaTimes, FaPe
 import InviteModal from './InviteModal'; 
 import CreateChannelModal from './CreateChannelModal';
 import { GlobalContext } from '../context/GlobalState';
-import axios from '../api/axios'
 import RenameChannelModal from './RenameChannelModal';
 const ChannelBar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -18,7 +17,8 @@ const ChannelBar = () => {
     setServer,
     setChannel,
     handleDeleteChannel,
-    handleKick
+    handleKick,
+    handleDeleteServer
   } = useContext(GlobalContext);
 
   const toggleDropdown = () => setShowDropdown(!showDropdown);
@@ -63,13 +63,10 @@ const ChannelBar = () => {
             <FaPlus /> Create Channel
           </div>
 
-          <div className="flex items-center gap-2 px-4 py-2 hover:bg-gray-800 cursor-pointer">
-            <FaCog /> Server Settings
-          </div>
-
-          <div className="flex items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-600 hover:text-white cursor-pointer">
+        {selectedServer.admin._id === user._id &&  <div className="flex items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-600 hover:text-white cursor-pointer" 
+          onClick={() => handleDeleteServer(selectedServer._id, selectedServer.name)}>
             <FaTrash /> Delete Server
-          </div>
+          </div>}
         </div>
       )}
 

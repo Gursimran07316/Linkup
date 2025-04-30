@@ -33,7 +33,8 @@ export const GlobalProvider = ({ children }) => {
   const fetchServers = async (userId) => {
     try {
       const { data } = await axios.get(`/servers?userId=${userId}`);
-      dispatch({ type: 'SET_SERVERS', payload: data });
+      dispatch({ type: 'SET_SERVERS', payload: data })
+      setChannel('general');
     } catch (error) {
       console.error('Error fetching servers', error);
     }
@@ -96,7 +97,7 @@ export const GlobalProvider = ({ children }) => {
         data: { userId: state.user._id },
       });
       setServer(null);
-      await fetchServers(state.user._id); 
+       fetchServers(state.user._id); 
     } catch (err) {
       alert('Failed to delete server.');
     }
@@ -111,7 +112,7 @@ export const GlobalProvider = ({ children }) => {
         adminId: state.user._id,
       });
       console.log(data.members);
-      await fetchMembers(state.selectedServer._id);
+       fetchMembers(state.selectedServer._id);
     } catch (error) {
       alert('Failed to kick member');
       console.log(error.message);

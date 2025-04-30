@@ -7,7 +7,6 @@ const InvitePage = ({  onJoin }) => {
   const [server, setLocalServer] = useState(null);
   const navigate = useNavigate();
   const {
-  
     user,
     setServer
   } = useContext(GlobalContext);

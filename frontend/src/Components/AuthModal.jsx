@@ -66,6 +66,24 @@ const AuthModal = () => {
       setUploading(false);
     }
   };
+  const handleGuestLogin = async () => {
+    try {
+      setUploading(true);
+      const payload = {
+        email: 'guest@example.com',         
+        password: 'guestpassword123'        
+      };
+  
+      const { data } = await axios.post('/auth/login', payload);
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      setUser(data);
+    } catch (err) {
+      setError('Failed to login as guest');
+    } finally {
+      setUploading(false);
+    }
+  };
+  
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -122,6 +140,15 @@ const AuthModal = () => {
               : 'Sign Up'}
           </button>
         </form>
+        {isLogin && (
+        <button
+            type="button"
+            className="mt-2 w-full bg-gray-600 hover:bg-gray-700 text-white py-2 rounded text-sm"
+            onClick={handleGuestLogin}
+          >
+            Continue as Guest
+          </button>
+        )}
         <div className="mt-4 text-sm text-center">
           {isLogin ? 'Don’t have an account?' : 'Already have an account?'}{' '}
           <button onClick={toggleMode} className="text-blue-400 hover:underline">
