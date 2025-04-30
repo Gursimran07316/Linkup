@@ -2,7 +2,7 @@
 
 **Linkup** is a real-time chat application inspired by Discord. Built with the MERN stack and Socket.io, it supports user authentication, channel-based messaging, server creation, and live typing indicators.
 
-![Linkup Screenshot](./screenshots/chat-ui.png)
+![Linkup Screenshot](./screenshots/chat-ui-img.png)
 
 ---
 
