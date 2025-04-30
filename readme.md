@@ -32,7 +32,7 @@
 - Node.js + Express.js
 - MongoDB + Mongoose
 - Socket.io
-- Multer (for image upload)
+- Multer + Cloudinary (for image upload)
 - JWT for Auth
 
 ---
@@ -49,50 +49,42 @@
 
 ```bash
 Linkup/
-├── backend/          # Express server
-│   ├── models/       # Mongoose schemas
-│   ├── routes/       # Auth & server APIs
-│   └── index.js      # Main entry
-├── frontend/         # React app
+├── backend/              # Express API and Socket.io server
+│   ├── controllers/      # Auth and server logic
+│   ├── models/           # Mongoose schemas
+│   ├── routes/           # REST APIs
+│   └── index.js          # Main server entry
+├── frontend/             # React app
 │   ├── src/
-│   │   ├── Components/
-│   │   ├── App.jsx
-│   │   └── ...
+│   │   ├── Components/   # UI components
+│   │   ├── context/      # Global state (Context + Reducer)
+│   │   └── App.jsx       # Main App component
 └── README.md
 🧪 Run Locally
+
 1. Clone the repo
-bash
-Copy
-Edit
 git clone https://github.com/YOUR_USERNAME/linkup-discord-clone.git
 cd linkup-discord-clone
+
 2. Install backend dependencies
-bash
-Copy
-Edit
 cd backend
 npm install
-Create a .env file in backend:
 
-env
-Copy
-Edit
+Create a .env file in backend:
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
 3. Install frontend dependencies
-bash
-Copy
-Edit
 cd ../frontend
 npm install
+
 4. Start the app
-bash
-Copy
-Edit
 # In one terminal
 cd backend
 npm run dev
-
 # In another terminal
 cd frontend
 npm run dev
