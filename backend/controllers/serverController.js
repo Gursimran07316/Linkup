@@ -214,3 +214,26 @@ export const getServerById = async (req, res) => {
     res.status(500).json({ message: 'Error fetching server', error: err.message });
   }
 };
+
+export const leaveServer = async (req, res) => {
+  const { serverId } = req.params;
+  const { userId } = req.body;
+
+  try {
+    const server = await Server.findById(serverId);
+    if (!server) return res.status(404).json({ message: 'Server not found' });
+
+    // Prevent admin from leaving (optional)
+    if (server.admin.toString() === userId) {
+      return res.status(403).json({ message: "Admin cannot leave the server." });
+    }
+
+    // Remove user from members
+    server.members = server.members.filter((id) => id.toString() !== userId);
+    await server.save();
+
+    res.status(200).json({ message: 'Left server successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to leave server', error: error.message });
+  }
+};

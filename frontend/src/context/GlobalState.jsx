@@ -125,6 +125,21 @@ export const GlobalProvider = ({ children }) => {
     }
   }, []);
 
+  const handleLeaveServer = async () => {
+    if (!window.confirm(`Are you sure you want to leave "${state.selectedServer.name}"?`)) return;
+  
+    try {
+      await axios.put(`/servers/${state.selectedServer._id}/leave`, {
+        userId: state.user._id,
+      });
+      setServer(null); // clear current server
+      fetchServers(state.user._id);
+    } catch (err) {
+      alert('Failed to leave server');
+    }
+  };
+  
+
   return (
     <GlobalContext.Provider
       value={{
@@ -146,7 +161,8 @@ export const GlobalProvider = ({ children }) => {
         handleDeleteChannel,
         handleRename,
         handleDeleteServer,
-        handleKick
+        handleKick,
+        handleLeaveServer
       }}
     >
       {children}

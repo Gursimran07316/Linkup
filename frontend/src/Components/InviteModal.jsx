@@ -40,10 +40,7 @@ const InviteModal = ({ inviteCode, onClose }) => {
           </button>
         </div>
 
-        <div className="flex items-center text-sm text-gray-400 gap-2">
-          <FaSync className="text-gray-500" />
-          Generate a new link (coming soon)
-        </div>
+       
       </div>
     </div>
   );

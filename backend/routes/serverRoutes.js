@@ -9,7 +9,8 @@ import {
     kickMember,
     renameChannel,
     deleteChannel, 
-    getServerById} from '../controllers/serverController.js';
+    getServerById,
+    leaveServer} from '../controllers/serverController.js';
 import upload from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
@@ -24,4 +25,5 @@ router.post('/join/:code', joinServer);
 router.put('/:serverId/kick/:userId', kickMember);
 router.put('/:serverId/channels/:channelId/rename', renameChannel);
 router.delete('/:serverId/channels/:channelId', deleteChannel);
+router.put('/:serverId/leave', leaveServer);
 export default router;
