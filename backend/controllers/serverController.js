@@ -109,8 +109,10 @@ import generateInviteCode from '../utils/generateInviteCode.js';
   
       server.members.push(userId);
       await server.save();
-  
-      res.status(200).json(server);
+      const populatedServer = await Server.findById(server._id)
+      .populate('members', 'username avatar')
+      .populate('admin', 'username avatar')
+      res.status(200).json(populatedServer);
     } catch (err) {
       res.status(500).json({ message: 'Failed to join', error: err.message });
     }
@@ -194,5 +196,21 @@ export const deleteChannel = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Failed to delete channel', error: err.message });
     
+  }
+};
+
+export const getServerById = async (req, res) => {
+  try {
+    const server = await Server.findById(req.params.id)
+      .populate('members', 'username avatar')
+      .populate('admin', 'username avatar');
+
+    if (!server) {
+      return res.status(404).json({ message: 'Server not found' });
+    }
+
+    res.status(200).json(server);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching server', error: err.message });
   }
 };

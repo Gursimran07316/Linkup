@@ -5,7 +5,7 @@ import CreateChannelModal from './CreateChannelModal';
 import { GlobalContext } from '../context/GlobalState';
 import axios from '../api/axios'
 import RenameChannelModal from './RenameChannelModal';
-const ChannelBar = ({ handleKick }) => {
+const ChannelBar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showChannelModal, setShowChannelModal] = useState(false);
@@ -17,7 +17,8 @@ const ChannelBar = ({ handleKick }) => {
     user,
     setServer,
     setChannel,
-    handleDeleteChannel
+    handleDeleteChannel,
+    handleKick
   } = useContext(GlobalContext);
 
   const toggleDropdown = () => setShowDropdown(!showDropdown);

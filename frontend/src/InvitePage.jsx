@@ -1,17 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from './api/axios';
-
-const InvitePage = ({ user, onJoin }) => {
+import { GlobalContext } from './context/GlobalState';
+const InvitePage = ({  onJoin }) => {
   const { code } = useParams();
-  const [server, setServer] = useState(null);
+  const [server, setLocalServer] = useState(null);
   const navigate = useNavigate();
+  const {
+  
+    user,
+    setServer
+  } = useContext(GlobalContext);
 
   useEffect(() => {
     const fetchServer = async () => {
       try {
         const { data } = await axios.get(`/servers/invite/${code}`);
-        setServer(data);
+        setLocalServer(data);
       } catch {
         alert('Invalid or expired invite link.');
         navigate('/');
@@ -27,7 +32,7 @@ const InvitePage = ({ user, onJoin }) => {
         userId: user._id,
       });
 
-      onJoin(data); // set selected server
+      setServer(data); // set selected server
       navigate('/');
     } catch (err) {
       alert('Join failed');

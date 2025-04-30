@@ -9,10 +9,10 @@ export default (state, action) => {
         return { ...state, selectedServer: action.payload };
         case 'SET_SERVERS':
             return { ...state, servers: action.payload };
-      case 'SET_MEMBERS':
-        return { ...state, members: action.payload };
       case 'SET_CHANNEL':
         return { ...state, currentChannel: action.payload };
+        case 'SET_MEMBERS':
+        return { ...state, selectedServer: {...state.selectedServer,members: action.payload} };
       case 'SET_MESSAGES':
         return { ...state, messages: action.payload };
       case 'SET_TYPING_USER':

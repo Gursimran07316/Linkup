@@ -4,7 +4,7 @@ import CreateServerModal from './CreateServerModal';
 import UserProfileModal from './UserProfileModal';
 import { GlobalContext } from '../context/GlobalState';
 
-const Sidebar = ({ handleDeleteServer }) => {
+const Sidebar = () => {
   const [showModal, setShowModal] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
@@ -15,7 +15,8 @@ const Sidebar = ({ handleDeleteServer }) => {
     setServer,
     fetchServers,
     logoutUser,
-    setChannel
+    setChannel,
+    handleDeleteServer
   } = useContext(GlobalContext);
 
   useEffect(() => {

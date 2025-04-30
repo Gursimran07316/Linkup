@@ -7,7 +7,6 @@ const initialState = {
   user: null,
   selectedServer: null,
   servers: [],
-  members: [],
   currentChannel: null,
   messages: [],
   typingUser: null,
@@ -43,6 +42,7 @@ export const GlobalProvider = ({ children }) => {
   const fetchMembers = async (serverId) => {
     try {
       const { data } = await axios.get(`/servers/${serverId}`);
+      console.log(data);
       dispatch({ type: 'SET_MEMBERS', payload: data.members });
     } catch (error) {
       console.error('Error fetching members', error);
@@ -87,6 +87,36 @@ export const GlobalProvider = ({ children }) => {
     }
   };
 
+  const handleDeleteServer = async (serverId, serverName) => {
+    const confirm = window.confirm(`Are you sure you want to delete "${serverName}"?`);
+    if (!confirm) return;
+
+    try {
+      await axios.delete(`/servers/${serverId}`, {
+        data: { userId: state.user._id },
+      });
+      setServer(null);
+      await fetchServers(state.user._id); 
+    } catch (err) {
+      alert('Failed to delete server.');
+    }
+  };
+
+   // Kick a member from server (admin only)
+   const handleKick = async (memberId) => {
+    if (!window.confirm('Are you sure you want to kick this member?')) return;
+
+    try {
+      const { data } = await axios.put(`/servers/${state.selectedServer._id}/kick/${memberId}`, {
+        adminId: state.user._id,
+      });
+      console.log(data.members);
+      await fetchMembers(state.selectedServer._id);
+    } catch (error) {
+      alert('Failed to kick member');
+      console.log(error.message);
+    }
+  };
   useEffect(() => {
     const storedUser = localStorage.getItem('userInfo');
     if (storedUser) {
@@ -113,7 +143,9 @@ export const GlobalProvider = ({ children }) => {
         fetchMembers,
         fetchMessages,
         handleDeleteChannel,
-        handleRename
+        handleRename,
+        handleDeleteServer,
+        handleKick
       }}
     >
       {children}
