@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import io from 'socket.io-client';
 import { GlobalContext } from '../context/GlobalState';
 
-const socket = io('http://localhost:5001');
+const socket = io(import.meta.env.VITE_SOCKET_URL);
 
 const ChatBox = () => {
   const [input, setInput] = useState('');

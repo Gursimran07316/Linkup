@@ -12,7 +12,7 @@ import { fileURLToPath } from 'url';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5002;
 
 app.use(cors());
 app.use(express.json());
@@ -105,10 +105,19 @@ app.use('/api/auth', authRoutes);
 // Servers route
 app.use('/api/servers', serverRoutes);
 
-// Test route
-app.get('/', (req, res) => {
-  res.send('API is running...');
-});
+
+if (process.env.NODE_ENV === 'production') {
+  const distPath = path.resolve(__dirname, '../frontend/dist');
+  app.use(express.static(distPath));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(distPath, 'index.html'));
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.send('API is running...');
+  });
+}
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
