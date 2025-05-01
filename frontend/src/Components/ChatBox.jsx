@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import io from 'socket.io-client';
 import { GlobalContext } from '../context/GlobalState';
 import { FaArrowLeft } from 'react-icons/fa';
+import { useSwipeable } from 'react-swipeable';
 
 const socket = io(import.meta.env.VITE_SOCKET_URL);
 
@@ -16,6 +17,15 @@ const ChatBox = ({ onBack, isDesktop }) => {
     typingUser,
     setTypingUser,
   } = useContext(GlobalContext);
+
+  const swipeHandlers = useSwipeable({
+    onSwipedRight: () => {
+      if (!isDesktop) onBack();
+    },
+    delta: 50, // minimum px before triggering
+    preventScrollOnSwipe: true,
+    trackTouch: true,
+  });
 
   useEffect(() => {
     if (!selectedServer || !currentChannel) return;
@@ -80,7 +90,7 @@ const ChatBox = ({ onBack, isDesktop }) => {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-900 min-h-0">
+    <div {...swipeHandlers} className="flex-1 flex flex-col bg-gray-900 min-h-0">
       {/* Channel Header */}
       <div className="border-b border-gray-700 p-4 text-lg font-semibold">
       {!isDesktop && (
