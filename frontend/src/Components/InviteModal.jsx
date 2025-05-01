@@ -2,7 +2,7 @@ import React from 'react';
 import { FaTimes, FaCopy, FaSync } from 'react-icons/fa';
 
 const InviteModal = ({ inviteCode, onClose }) => {
-  const inviteLink = `http://localhost:5173/invite/${inviteCode}`;
+  const inviteLink = `${import.meta.env.VITE_SOCKET_URL}/invite/${inviteCode}`;
 
   const copyToClipboard = async () => {
     try {
