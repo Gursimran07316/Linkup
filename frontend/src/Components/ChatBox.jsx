@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import io from 'socket.io-client';
 import { GlobalContext } from '../context/GlobalState';
+import { FaArrowLeft } from 'react-icons/fa';
 
 const socket = io(import.meta.env.VITE_SOCKET_URL);
 
-const ChatBox = () => {
+const ChatBox = ({ onBack, isDesktop }) => {
   const [input, setInput] = useState('');
   const topRef = useRef(null);
   const [messages, setMessages] = useState([])
@@ -79,9 +80,17 @@ const ChatBox = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-900">
+    <div className="flex-1 flex flex-col bg-gray-900 min-h-0">
       {/* Channel Header */}
       <div className="border-b border-gray-700 p-4 text-lg font-semibold">
+      {!isDesktop && (
+          <button
+            onClick={onBack}
+            className="text-gray-300 hover:text-white focus:outline-none"
+          >
+            <FaArrowLeft />
+          </button>
+        )}
         #{currentChannel}
       </div>
 

@@ -14,7 +14,7 @@ import InviteModal from "./InviteModal";
 import CreateChannelModal from "./CreateChannelModal";
 import { GlobalContext } from "../context/GlobalState";
 import RenameChannelModal from "./RenameChannelModal";
-const ChannelBar = () => {
+const ChannelBar = ({onChannelSelect}) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showChannelModal, setShowChannelModal] = useState(false);
@@ -37,7 +37,7 @@ const ChannelBar = () => {
   if (!selectedServer) return null; // no server selected
 
   return (
-    <div className="w-60 bg-gray-850 p-4 bg-gray-800 relative flex flex-col space-y-6 overflow-y-auto">
+    <div className="w-full md:w-60 bg-gray-850 p-4 bg-gray-800 relative flex flex-col space-y-6 overflow-y-auto">
       {/* Server Title */}
       <div
         className="flex items-center justify-between p-4 border-b border-gray-700 cursor-pointer hover:bg-gray-700 rounded"
@@ -126,6 +126,7 @@ const ChannelBar = () => {
             }`}
             onClick={() => {
               setChannel(channel.name);
+              onChannelSelect(); 
             }}
           >
             <span># {channel.name}</span>
